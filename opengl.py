@@ -26,7 +26,6 @@ class MainWindow(QMainWindow):
         self.gl_widget = GLWidget(self)
         self.setCentralWidget(self.gl_widget)
 
-
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainWindow()
