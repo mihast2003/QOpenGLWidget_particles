@@ -4,6 +4,8 @@ import numpy as np
 from PySide6.QtWidgets import QApplication, QMainWindow
 from PySide6.QtOpenGLWidgets import QOpenGLWidget
 from OpenGL import GL
+from PySide6.QtGui import QSurfaceFormat
+from PySide6.QtCore import Qt
 
 
 VERTEX_SHADER = """
@@ -29,7 +31,11 @@ void main()
 
 class GLWidget(QOpenGLWidget):
     def initializeGL(self):
-        GL.glClearColor(0.1, 0.1, 0.15, 1.0)
+        GL.glClearColor(0.0, 0.0, 0.0, 0.0)
+
+        # Enable alpha blending
+        GL.glEnable(GL.GL_BLEND)
+        GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
 
         # ---- Compile shaders ----
         self.program = GL.glCreateProgram()
@@ -50,7 +56,7 @@ class GLWidget(QOpenGLWidget):
         GL.glDeleteShader(fs)
 
         # ---- Quad data (2 triangles) ----
-        vertices = np.array([
+        vertices = np.array([ 
             # First triangle
             -0.5, -0.5,
              0.5, -0.5,
@@ -91,6 +97,7 @@ class GLWidget(QOpenGLWidget):
 
     def paintGL(self):
         GL.glClear(GL.GL_COLOR_BUFFER_BIT)
+        GL.glClear(GL.GL_DEPTH_BUFFER_BIT)
 
         GL.glUseProgram(self.program)
         GL.glBindVertexArray(self.vao)
@@ -103,9 +110,17 @@ class GLWidget(QOpenGLWidget):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        # self.setWindowFlag(Qt.WindowType.FramelessWindowHint)
+
         self.setWindowTitle("Quad Example (VAO + VBO)")
         self.resize(600, 400)
-        self.setCentralWidget(GLWidget())
+
+        gl = GLWidget()
+        gl.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground) 
+        gl.setAutoFillBackground(False)
+
+        self.setCentralWidget(gl)
 
 
 if __name__ == "__main__":
